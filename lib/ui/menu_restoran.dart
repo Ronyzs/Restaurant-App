@@ -1,32 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/database/restoran.dart';
-import 'package:restaurant_app/pages/detail_resto.dart';
-import 'package:restaurant_app/ui/search_box.dart';
+import 'package:restaurant_app/database/model/restoran_data.dart';
+import 'package:restaurant_app/pages/detail_resto_page.dart';
 import '../package/const.dart';
 
 class MenuResto extends StatefulWidget {
-  List restoran;
+  final RestoranData restoList;
 
-  MenuResto({required this.restoran});
+  MenuResto({required this.restoList});
 
   @override
   State<MenuResto> createState() => _MenuRestoState();
 }
 
 class _MenuRestoState extends State<MenuResto> {
+  late List resto;
+
+  String query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    resto = widget.restoList.restaurants;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildSearch(),
         Expanded(
           child: GridView.builder(
             padding: EdgeInsets.all(0),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, childAspectRatio: 4 / 5),
-            itemCount: widget.restoran.length,
+                crossAxisCount: 2, childAspectRatio: 6 / 8),
+            itemCount: resto.length,
             itemBuilder: (context, index) {
-              return _buildDetailItem(context, widget.restoran[index]);
+              return _buildDetailItem(context, resto[index]);
             },
           ),
         ),
@@ -34,7 +42,7 @@ class _MenuRestoState extends State<MenuResto> {
     );
   }
 
-  Widget _buildDetailItem(context, dataRestoran restoran) {
+  Widget _buildDetailItem(context, Restaurant_Data restoran) {
     return Material(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -56,10 +64,15 @@ class _MenuRestoState extends State<MenuResto> {
     );
   }
 
-  Widget _restoranInkwell(context, dataRestoran restoran) {
+  Widget _restoranInkwell(context, Restaurant_Data restoran) {
     return InkWell(
-      onTap: () => Navigator.pushNamed(context, DetailRestoPage.routeName,
-          arguments: restoran),
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          DetailRestoPage.routeName,
+          arguments: restoran.id,
+        );
+      },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Container(
@@ -88,7 +101,7 @@ class _MenuRestoState extends State<MenuResto> {
     );
   }
 
-  Row _rating(dataRestoran restoran, context) {
+  Row _rating(Restaurant_Data restoran, context) {
     return Row(
       children: [
         const Icon(
@@ -97,14 +110,14 @@ class _MenuRestoState extends State<MenuResto> {
         ),
         const SizedBox(width: 4),
         Text(
-          restoran.rating,
+          restoran.rating.toString(),
           style: Theme.of(context).textTheme.labelLarge,
         ),
       ],
     );
   }
 
-  Row _lokasi(dataRestoran restoran, context) {
+  Row _lokasi(Restaurant_Data restoran, context) {
     return Row(
       children: [
         const Icon(
@@ -120,7 +133,7 @@ class _MenuRestoState extends State<MenuResto> {
     );
   }
 
-  Text _namaResto(dataRestoran restoran, context) {
+  Text _namaResto(Restaurant_Data restoran, context) {
     return Text(
       restoran.namaTempat,
       style: Theme.of(context).textTheme.titleLarge,
@@ -128,13 +141,13 @@ class _MenuRestoState extends State<MenuResto> {
     );
   }
 
-  ClipRRect _bannerGambarResto(dataRestoran restoran) {
+  ClipRRect _bannerGambarResto(Restaurant_Data restoran) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: Hero(
         tag: restoran.id,
         child: Image.network(
-          restoran.picId,
+          "https://restaurant-api.dicoding.dev/images/medium/${restoran.picId}",
           height: 100,
           width: double.infinity,
           fit: BoxFit.fill,
@@ -142,8 +155,4 @@ class _MenuRestoState extends State<MenuResto> {
       ),
     );
   }
-
-  Widget _buildSearch() => SearchBox(
-        hintText: 'Search',
-      );
 }
